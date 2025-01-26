@@ -1,0 +1,23 @@
+{
+  "name": "turso-edge-pop",
+  "version": "0.0.1",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch run src/index.ts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.4.2",
+    "@libsql/client": "^0.14.0",
+    "@t3-oss/env-core": "^0.11.1",
+    "hono": "^4.6.17",
+    "zod": "^3.24.1"
+  }
+}
