@@ -17,7 +17,9 @@
     "@hono/zod-validator": "^0.4.2",
     "@libsql/client": "^0.14.0",
     "@t3-oss/env-core": "^0.11.1",
-    "hono": "^4.6.17",
+    "hono": "^4.6.19",
+    "hono-pino": "^0.7.0",
+    "pino": "^9.6.0",
     "zod": "^3.24.1"
   }
 }

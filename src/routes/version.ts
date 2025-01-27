@@ -1,13 +1,11 @@
 import { Hono } from "hono";
-import packageJson from "../../package.json" assert { type: "json" };
-import { env } from "../helpers/env";
+import { appVersion, region } from "../helpers/app-vars";
 
 const route = new Hono();
 
-const region = env.REGION ?? env.FLY_REGION ?? "default";
 route.get("/", (c) => {
   return c.json({
-    version: packageJson.version,
+    version: appVersion,
     protocol: "hrana-2",
     region,
   });

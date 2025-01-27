@@ -1,8 +1,9 @@
 import { Hono } from "hono";
+import type { Env as HonoPinoEnv } from "hono-pino";
 import { tursoClient } from "../helpers/turso";
 import { verifyClientAuth } from "../middlewares/auth";
 
-const route = new Hono();
+const route = new Hono<HonoPinoEnv>();
 
 // This only makes sense if you can call selected server instance directly.
 // Fly.io is using Anycast to direct your call to closest machine
@@ -13,7 +14,8 @@ route.get("/", verifyClientAuth, async (c) => {
       frameNo: syncData?.frame_no ?? null,
       framesSynced: syncData?.frames_synced ?? null,
     });
-  } catch {
+  } catch (e) {
+    c.var.logger.error(e);
     return c.json(
       {
         error: {

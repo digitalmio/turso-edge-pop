@@ -1,4 +1,5 @@
 import { createMiddleware } from "hono/factory";
+import { env } from "../helpers/env";
 
 export const verifyClientAuth = createMiddleware(async (c, next) => {
   const authHeader = c.req.header("Authorization");
@@ -17,7 +18,7 @@ export const verifyClientAuth = createMiddleware(async (c, next) => {
   }
 
   // Invalid token
-  if (authHeader.slice(7) !== process.env.PROXY_AUTH_TOKEN) {
+  if (authHeader.slice(7) !== env.PROXY_AUTH_TOKEN) {
     return c.json(
       {
         error: {
