@@ -1,7 +1,8 @@
 import { Hono } from "hono";
+import type { Env as HonoPinoEnv } from "hono-pino";
 import { appVersion, region } from "../helpers/app-vars";
 
-const route = new Hono();
+const route = new Hono<HonoPinoEnv>();
 
 route.get("/", (c) => {
   return c.json({

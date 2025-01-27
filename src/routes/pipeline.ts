@@ -1,12 +1,13 @@
 import { zValidator } from "@hono/zod-validator";
 import type { InStatement } from "@libsql/client";
 import { Hono } from "hono";
+import type { Env as HonoPinoEnv } from "hono-pino";
 import { z } from "zod";
 import { formatValue } from "../helpers/format-value";
 import { tursoClient } from "../helpers/turso";
 import { verifyClientAuth } from "../middlewares/auth";
 
-const route = new Hono();
+const route = new Hono<HonoPinoEnv>();
 
 // Schema definition for request validation
 const pipelineSchema = z.object({

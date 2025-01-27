@@ -1,7 +1,8 @@
 import { Hono } from "hono";
+import type { Env as HonoPinoEnv } from "hono-pino";
 import { tursoClient } from "../helpers/turso";
 
-const route = new Hono();
+const route = new Hono<HonoPinoEnv>();
 
 route.get("/", async (c) => {
   try {
