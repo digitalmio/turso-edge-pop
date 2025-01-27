@@ -4,7 +4,7 @@ import { appVersion, region } from "../helpers/app-vars";
 import { env } from "../helpers/env";
 
 export const registerLogger = createMiddleware(async (c, next) => {
-  if (env.DISABLE_LOGGER) {
+  if (env.QUIET) {
     await next();
   } else {
     await pinoLogger({
@@ -15,7 +15,7 @@ export const registerLogger = createMiddleware(async (c, next) => {
 
 export const appendLoggerInfo = createMiddleware<HonoPinoEnv>(
   async (c, next) => {
-    if (!env.DISABLE_LOGGER) {
+    if (!env.QUIET) {
       // assign debug information to each request log
       c.var.logger.assign({
         region,
