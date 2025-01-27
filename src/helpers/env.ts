@@ -11,6 +11,8 @@ export const env = createEnv({
 
     // App
     DB_FILEPATH: z.string().default("/app/data/local.db"),
+    DB_ENCRYPTION_KEY: z.string().optional(),
+
     PROXY_AUTH_TOKEN: z.string(),
     PORT: z.coerce.number().default(3000),
     REGION: z.string().optional(),
