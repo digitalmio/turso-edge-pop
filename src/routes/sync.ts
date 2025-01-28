@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import type { Env as HonoPinoEnv } from "hono-pino";
-import { tursoClient } from "../helpers/turso";
+import { tursoClient } from "../helpers/turso-client";
 import { verifyClientAuth } from "../middlewares/auth";
 
 const route = new Hono<HonoPinoEnv>();

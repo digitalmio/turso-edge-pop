@@ -6,7 +6,7 @@ import { appendLoggerInfo, registerLogger } from "../middlewares/logger";
 describe("POST /pipeline", () => {
   it("should handle execute request successfully", async () => {
     // Mock turso client
-    mock.module("../helpers/turso", () => ({
+    mock.module("../helpers/turso-client", () => ({
       tursoClient: {
         execute: mock(() =>
           Promise.resolve({
@@ -21,7 +21,7 @@ describe("POST /pipeline", () => {
 
     // Make the request
     const pipelineRoute = (await import("./pipeline")).default;
-    const { tursoClient } = await import("../helpers/turso");
+    const { tursoClient } = await import("../helpers/turso-client");
     const app = new Hono<HonoPinoEnv>()
       .use(registerLogger)
       .use(appendLoggerInfo);
@@ -127,7 +127,7 @@ describe("POST /pipeline", () => {
 
   it("should handle database error", async () => {
     // Mock turso client with error
-    mock.module("../helpers/turso", () => ({
+    mock.module("../helpers/turso-client", () => ({
       tursoClient: {
         execute: mock(() => Promise.reject(new Error("Database error"))),
       },
@@ -135,7 +135,7 @@ describe("POST /pipeline", () => {
 
     // Make the request
     const pipelineRoute = (await import("./pipeline")).default;
-    const { tursoClient } = await import("../helpers/turso");
+    const { tursoClient } = await import("../helpers/turso-client");
     const app = new Hono<HonoPinoEnv>()
       .use(registerLogger)
       .use(appendLoggerInfo);

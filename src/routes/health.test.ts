@@ -3,7 +3,7 @@ import { Hono } from "hono";
 
 describe("GET /health", async () => {
   it("should return 200 OK and call tursoClient.execute", async () => {
-    mock.module("../helpers/turso", () => {
+    mock.module("../helpers/turso-client", () => {
       return {
         tursoClient: {
           execute: mock(() => Promise.resolve(1)),
@@ -13,7 +13,7 @@ describe("GET /health", async () => {
 
     // Make the request
     const healthRoute = (await import("./health")).default;
-    const { tursoClient } = await import("../helpers/turso");
+    const { tursoClient } = await import("../helpers/turso-client");
     const app = new Hono();
     app.route("/health", healthRoute);
     const req = await app.request("/health");
@@ -24,7 +24,7 @@ describe("GET /health", async () => {
   });
 
   it("should return 503 Service Unavailable and call tursoClient.execute", async () => {
-    mock.module("../helpers/turso", () => {
+    mock.module("../helpers/turso-client", () => {
       return {
         tursoClient: {
           execute: mock(() => Promise.reject(null)),
@@ -34,7 +34,7 @@ describe("GET /health", async () => {
 
     // Make the request
     const healthRoute = (await import("./health")).default;
-    const { tursoClient } = await import("../helpers/turso");
+    const { tursoClient } = await import("../helpers/turso-client");
     const app = new Hono();
     app.route("/health", healthRoute);
     const req = await app.request("/health");

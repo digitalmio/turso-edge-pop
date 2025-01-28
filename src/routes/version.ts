@@ -7,7 +7,7 @@ const route = new Hono<HonoPinoEnv>();
 route.get("/", (c) => {
   return c.json({
     version: appVersion,
-    protocol: "hrana-2",
+    protocol: "hrana-3",
     region,
   });
 });
