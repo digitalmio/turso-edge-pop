@@ -6,6 +6,6 @@ export const tursoClient = createClient({
   syncUrl: env.TURSO_DATABASE_URL,
   authToken: env.TURSO_AUTH_TOKEN,
   syncInterval: env.TURSO_SYNC_INTERVAL,
-  // encryptionKey: env.DB_ENCRYPTION_KEY,
+  encryptionKey: env.DB_ENCRYPTION_KEY,
   fetch, // use Bun native fetch
 });
