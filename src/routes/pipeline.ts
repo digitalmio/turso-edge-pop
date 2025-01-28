@@ -22,6 +22,10 @@ const pipelineSchema = z.object({
             sql: z.string(),
             args: z.any(),
           }),
+          z.object({
+            sql: z.string(),
+            named_args: z.any(),
+          }),
         ]),
       }),
       z.object({ type: z.literal("close") }),
