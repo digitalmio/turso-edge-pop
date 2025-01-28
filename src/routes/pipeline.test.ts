@@ -1,5 +1,7 @@
 import { describe, expect, it, mock } from "bun:test";
 import { Hono } from "hono";
+import type { Env as HonoPinoEnv } from "hono-pino";
+import { appendLoggerInfo, registerLogger } from "../middlewares/logger";
 
 describe("POST /pipeline", () => {
   it("should handle execute request successfully", async () => {
@@ -20,7 +22,9 @@ describe("POST /pipeline", () => {
     // Make the request
     const pipelineRoute = (await import("./pipeline")).default;
     const { tursoClient } = await import("../helpers/turso");
-    const app = new Hono();
+    const app = new Hono<HonoPinoEnv>()
+      .use(registerLogger)
+      .use(appendLoggerInfo);
     app.route("/v2/pipeline", pipelineRoute);
 
     const req = await app.request("/v2/pipeline", {
@@ -84,7 +88,9 @@ describe("POST /pipeline", () => {
   it("should handle close request successfully", async () => {
     // Make the request
     const pipelineRoute = (await import("./pipeline")).default;
-    const app = new Hono();
+    const app = new Hono<HonoPinoEnv>()
+      .use(registerLogger)
+      .use(appendLoggerInfo);
     app.route("/v2/pipeline", pipelineRoute);
 
     const req = await app.request("/v2/pipeline", {
@@ -130,7 +136,9 @@ describe("POST /pipeline", () => {
     // Make the request
     const pipelineRoute = (await import("./pipeline")).default;
     const { tursoClient } = await import("../helpers/turso");
-    const app = new Hono();
+    const app = new Hono<HonoPinoEnv>()
+      .use(registerLogger)
+      .use(appendLoggerInfo);
     app.route("/v2/pipeline", pipelineRoute);
 
     const req = await app.request("/v2/pipeline", {

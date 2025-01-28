@@ -2,6 +2,7 @@ import { type Env as HonoPinoEnv, pinoLogger } from "hono-pino";
 import { createMiddleware } from "hono/factory";
 import { appVersion, region } from "../helpers/app-vars";
 import { env } from "../helpers/env";
+import { redis } from "../helpers/redis";
 
 export const registerLogger = createMiddleware(async (c, next) => {
   if (env.QUIET) {
@@ -21,6 +22,7 @@ export const appendLoggerInfo = createMiddleware<HonoPinoEnv>(
         region,
         tursoEdgePopVersion: appVersion,
         syncInterval: env.TURSO_SYNC_INTERVAL,
+        redisSync: Boolean(redis),
       });
     }
 

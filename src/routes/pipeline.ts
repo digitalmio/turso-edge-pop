@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import type { Env as HonoPinoEnv } from "hono-pino";
 import { z } from "zod";
 import { formatValue } from "../helpers/format-value";
+import { publishRedisSyncCommand } from "../helpers/redis";
 import { tursoClient } from "../helpers/turso";
 import { verifyClientAuth } from "../middlewares/auth";
 
@@ -42,7 +43,7 @@ const handleExecuteRequest = async (stmt: InStatement) => {
   return {
     type: "ok",
     response: {
-      type: "execute",
+      type: "execute" as const,
       result: {
         cols: result.columns.map((name) => ({
           name,
@@ -65,7 +66,7 @@ const handleCloseRequest = () => {
   return {
     type: "ok",
     response: {
-      type: "close",
+      type: "close" as const,
     },
   };
 };
@@ -98,12 +99,24 @@ route.post(
         }
       }
 
+      const hasAffectedRows = results.some(
+        (result) =>
+          result.response.type === "execute" &&
+          result.response.result.affected_row_count !== 0,
+      );
+      c.var.logger.assign({ hasAffectedRows });
+
+      if (hasAffectedRows) {
+        await publishRedisSyncCommand();
+      }
+
       return c.json({
         baton: null,
         base_url: null,
         results,
       });
     } catch (error) {
+      console.error(error);
       return c.json(handleError(error), 500);
     }
   },
