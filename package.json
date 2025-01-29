@@ -14,7 +14,6 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@hono/zod-validator": "^0.4.2",
     "@libsql/client": "^0.14.0",
     "@t3-oss/env-core": "^0.11.1",
     "debounce": "^2.2.0",
