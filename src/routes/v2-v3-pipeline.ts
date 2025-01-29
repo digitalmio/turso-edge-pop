@@ -5,39 +5,13 @@ import { publishRedisSyncCommand } from "../helpers/redis";
 import { tursoProxy } from "../helpers/truso-proxy";
 import { tursoClient } from "../helpers/turso-client";
 import {
-  hasConditionalBatch,
   hasUnsupportedTypes,
+  isBatchResponseWithWrites,
   parseTursoResultV2V3,
 } from "../helpers/turso-response-parser";
 import { verifyClientAuth } from "../middlewares/auth";
 
 const route = new Hono<HonoPinoEnv>();
-
-// Handle batch request
-// returns array/tuple of response and boolean indicating if write operation was performed
-const handleBatchRequest = async (
-  stmt: InStatement[],
-): Promise<[Record<string, unknown>, boolean]> => {
-  const results = await tursoClient.batch(stmt);
-  let hadWriteOperations = false;
-  return [
-    {
-      type: "ok",
-      response: {
-        type: "batch" as const,
-        result: {
-          step_results: results.map((result) => {
-            const parsedResult = parseTursoResultV2V3(result);
-            hadWriteOperations = hadWriteOperations || parsedResult[1];
-            return parsedResult[0];
-          }),
-          step_errors: new Array(results.length).fill(null),
-        },
-      },
-    },
-    hadWriteOperations,
-  ];
-};
 
 // Handle execute request
 // returns array/tuple of response and boolean indicating if write operation was performed
@@ -84,16 +58,25 @@ route.post("/", verifyClientAuth, async (c) => {
     const { requests } = await c.req.json();
 
     // if requests contains types other than execute and close or simple batch, proxy to Turso
-    if (hasUnsupportedTypes(requests) || hasConditionalBatch(requests)) {
+    if (hasUnsupportedTypes(requests)) {
       c.var.logger.assign({ type: "proxy" });
       const proxyResult = await tursoProxy(await c.req.text());
+      const isSuccessfulResponse = proxyResult.status === 200;
 
-      return proxyResult.status === 200
+      // check if the proxy result is Batch (most likely) and contains write operations
+      if (
+        isSuccessfulResponse &&
+        isBatchResponseWithWrites(proxyResult.result)
+      ) {
+        await publishRedisSyncCommand();
+      }
+
+      return isSuccessfulResponse
         ? c.json(proxyResult.result)
         : c.text(proxyResult.result, proxyResult.status);
     }
 
-    // other types run locally
+    // run 'execute' and 'close' requests locally
     const results = [];
     let hadWriteOperations = false;
     c.var.logger.assign({ type: "local" });
@@ -104,14 +87,6 @@ route.post("/", verifyClientAuth, async (c) => {
         const res = await handleExecuteRequest(request.stmt as InStatement);
         results.push(res[0]);
         hadWriteOperations = hadWriteOperations || res[1];
-      } else if (request.type === "batch") {
-        const res = await handleBatchRequest(
-          request.batch.steps.map(
-            (step: Record<string, unknown>) => step.stmt,
-          ) as InStatement[],
-        );
-        hadWriteOperations = hadWriteOperations || res[1];
-        results.push(res[0]);
       } else if (request.type === "close") {
         results.push(handleCloseRequest());
       }

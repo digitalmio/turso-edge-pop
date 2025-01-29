@@ -20,6 +20,7 @@ export const formatValue = (value: unknown) => {
 
 // parse Turso result to match Turso V2-V3 response format
 // this is for /v2/pipeline and /v3/pipeline
+// returns array/tuple of response and boolean indicating if write operation was performed
 export const parseTursoResultV2V3 = (
   result: ResultSet,
 ): [Record<string, unknown>, boolean] => {
@@ -50,6 +51,7 @@ export const parseTursoResultV2V3 = (
 
 // parse Turso result to match Turso V0 response format
 // this is for /v0/query
+// returns array/tuple of response and boolean indicating if write operation was performed
 export const parseTursoResultV0 = (
   result: ResultSet,
 ): [Record<"results", unknown>, boolean] => {
@@ -120,19 +122,26 @@ export const shouldUseTransactionCheck = (statements: Query[]) =>
 export const hasUnsupportedTypes = (requests: Record<string, unknown>[]) =>
   requests.some(
     (request: Record<string, unknown>) =>
-      request.type !== "execute" &&
-      request.type !== "close" &&
-      request.type !== "batch",
+      !["execute", "close"].includes(request.type as string),
   );
 
-// check if the requests contain a conditional batch
-// biome-ignore lint/suspicious/noExplicitAny: this will be an object, just need to check if key exists
-export const hasConditionalBatch = (requests: Record<string, any>[]) =>
-  requests.some((request) => {
-    return (
-      request.type === "batch" &&
-      request?.batch?.steps?.some((step: Record<string, unknown>) =>
-        Boolean(step.condition),
-      )
+// check if the batch response contains write operations
+export const isBatchResponseWithWrites = (
+  tursoResponse: Record<string, unknown>,
+) => {
+  const response = tursoResponse.response as {
+    type: string;
+    result: {
+      step_results: Array<{ affected_row_count?: number }>;
+    };
+  };
+
+  if (response?.type === "batch") {
+    return response.result.step_results.some(
+      (res) => (res.affected_row_count ?? 0) !== 0,
     );
-  });
+  }
+
+  // non-batch response
+  return false;
+};
