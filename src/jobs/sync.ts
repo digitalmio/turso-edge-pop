@@ -1,15 +1,15 @@
 import debounce from "debounce";
 import { env } from "../helpers/env";
 import { logger } from "../helpers/logger";
-import { redis } from "../helpers/redis";
+import { redisSub } from "../helpers/redis";
 import { tursoClient } from "../helpers/turso-client";
 
 export let lastSyncTimestamp = 0;
 
 export const syncJob = () => {
-  if (redis) {
+  if (redisSub) {
     // subscribe
-    redis.subscribe(env.REDIS_SYNC_CHANNEL, (err, count) => {
+    redisSub.subscribe(env.REDIS_SYNC_CHANNEL, (err, count) => {
       if (err) {
         logger.error(
           "Failed to subscribe to Redis %s channel: %s",
@@ -25,7 +25,7 @@ export const syncJob = () => {
     });
 
     // listen for messages
-    redis.on("message", (channel, message) => {
+    redisSub.on("message", (channel, message) => {
       if (channel === env.REDIS_SYNC_CHANNEL && message === "sync") {
         debounce(async () => {
           logger.info(

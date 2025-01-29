@@ -21,6 +21,7 @@
   },
   "biome.enabled": true,
   "cSpell.words": [
+    "astify",
     "biomejs",
     "hrana",
     "libsql",

@@ -20,7 +20,7 @@ describe("POST /pipeline", () => {
     }));
 
     // Make the request
-    const pipelineRoute = (await import("./pipeline")).default;
+    const pipelineRoute = (await import("./v2-v3-pipeline")).default;
     const { tursoClient } = await import("../helpers/turso-client");
     const app = new Hono<HonoPinoEnv>()
       .use(registerLogger)
@@ -87,7 +87,7 @@ describe("POST /pipeline", () => {
 
   it("should handle close request successfully", async () => {
     // Make the request
-    const pipelineRoute = (await import("./pipeline")).default;
+    const pipelineRoute = (await import("./v2-v3-pipeline")).default;
     const app = new Hono<HonoPinoEnv>()
       .use(registerLogger)
       .use(appendLoggerInfo);
@@ -134,7 +134,7 @@ describe("POST /pipeline", () => {
     }));
 
     // Make the request
-    const pipelineRoute = (await import("./pipeline")).default;
+    const pipelineRoute = (await import("./v2-v3-pipeline")).default;
     const { tursoClient } = await import("../helpers/turso-client");
     const app = new Hono<HonoPinoEnv>()
       .use(registerLogger)
