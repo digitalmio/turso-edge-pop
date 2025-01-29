@@ -30,7 +30,7 @@ app.route("/version", versionRoute);
 app.route("/health", healthRoute);
 app.route("/sync", syncRoute);
 
-if (!env.QUIET) {
+if (!env.QUIET || process.env.NODE_ENV !== "production") {
   console.log(`🚀 Turso Edge Pop server running on port ${env.PORT}`);
   console.log(`📦 Version: ${appVersion}`);
   console.log(`🌎 Region: ${region}`);
