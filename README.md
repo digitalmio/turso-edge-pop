@@ -1,6 +1,6 @@
 # Turso Edge POP
 
-Stateless* Turso Edge Point of Presence. Something between a proxy and an HTTP database server. Written in TypeScript using [Bun](https://bun.sh/) and [Hono](https://hono.dev/).
+Turso Edge Point of Presence. Something between a proxy and an HTTP database server. Written in TypeScript using [Bun](https://bun.sh/) and [Hono](https://hono.dev/).
 
 On start, it creates a local database and syncs it with the origin Turso database. It stays up to date through interval sync (by default every 60 seconds) and can optionally listen for changes via Redis pub/sub to update the database as needed on top of the interval sync.
 
@@ -8,7 +8,6 @@ Turso Edge POP supports HTTP requests only.
 
 Please note that this project is in its early stages. If you have found any bugs or have any suggestions, please open an issue or contact me directly on [X](https://x.com/mziehlke) or [Bluesky](https://bsky.app/profile/dmio.co).
 
-`*` By *Stateless* I mean that the app can be destroyed at any time and it will re-create database on start. Local database is treated more like a cache. LibSQL client itself, that the app is using, is stateful.
 
 ## Motivation
 Turso disabled Edge Replicas functionality and for new databases, you won't be able to replicate your data globally: https://turso.tech/blog/upcoming-changes-to-the-turso-platform-and-roadmap#simplifying-our-replication-model
