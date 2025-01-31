@@ -1,12 +1,8 @@
 # Turso Edge POP
 
-Turso Edge Point of Presence. Something between a proxy and an HTTP database server. Written in TypeScript using [Bun](https://bun.sh/) and [Hono](https://hono.dev/).
+Turso Edge Point of Presence – a mix of proxy and an HTTP database server that replicates/mimics the Turso server endpoint.
 
-On start, it creates a local database and syncs it with the origin Turso database. It stays up to date through interval sync (by default every 60 seconds) and can optionally listen for changes via Redis pub/sub to update the database as needed on top of the interval sync.
-
-Turso Edge POP supports HTTP requests only.
-
-This project started as a Bun/Hono rewrite of the [Turso CDN](https://github.com/notrab/turso-cdn/blob/main/server.js) project and grew "a bit" from there.
+This project started as a [Bun](https://bun.sh/) & [Hono](https://hono.dev/) rewrite of the [Turso CDN](https://github.com/notrab/turso-cdn/blob/main/server.js) project and grew "a bit" from there.
 
 Please note that this project is in its early stages. If you have found any bugs or have any suggestions, please open an issue or contact me directly on [X](https://x.com/mziehlke) or [Bluesky](https://bsky.app/profile/dmio.co).
 
@@ -18,7 +14,11 @@ I built this project to be able to simulate the original functionality whilst ha
 As a JS/TypeScript developer for this project, I was choosing between Bun and Deno as they can easily compile to a single executable file and are super fast. Both runtimes are great, but I chose Bun as I have more experience with it.
 
 ## How does it work?
-Turso Edge POP is an HTTP server. On start, it runs by default on port 3000. It provides a handful of endpoints, but the most important ones are `POST /v2/pipeline`, `POST /v3/pipeline` and `POST /`.
+Turso Edge POP is an HTTP server that replicates Turso database endpoint behaviour. It runs by default on port 3000.
+
+On start, it creates a local database and syncs it with the origin Turso database. It stays up to date through interval sync (by default every 60 seconds) and can optionally listen for changes via Redis pub/sub to update the database as needed on top of the interval sync.
+
+POP provides a handful of endpoints, same as Turso, but the most important ones are `POST /v2/pipeline`, `POST /v3/pipeline` and `POST /`.
 
 Based on the request type, it will either proxy the request to the origin Turso database or query the local database using the official Turso LibSQL client. The SDK internally then decides if the query will be from the local or origin database.
 
@@ -26,9 +26,13 @@ The `/` endpoint statements are all executed against the local database via the 
 
 The `/v2` and `/v3` endpoints are more complex. Turso Edge POP will run all `execute` and `close` statements locally. All other (mainly `batch`) statements are proxied to the origin database and returned without any changes back to the client.
 
-The app also exposes a `/health` and `/version` informational endpoints. 
+The app also exposes a `/health` and `/version` informational endpoints.
 
-Lastly, you can use `/sync` endpoint to manually trigger a sync of the local database with the origin database.
+Lastly, you can use `/sync` endpoint to manually trigger a sync of the _local database_ with the origin database. Please note that this will sync local POP only (ie won't send pubsub message to other POPs).
+
+Turso Edge POP supports HTTP requests only (no websocket support etc), hence you need to use `http`/`https` url when connecting to POP.
+
+When you point your client to the POP, it will either respond with local data or seamlessly proxy your request to the origin server. This process is automatic and does not require any special setup from the client. On successful origin response, POP will also process a `sync` update to fetch a fresh copy if any writes were made.
 
 ## How to deploy? Where to host?
 You will need to deploy POPs on your own infrastructure. The app requires some form of persistent storage to store the local database. The simplest option will be Fly.io - they offer an Anycast network so you do not need to worry about routing.
@@ -79,7 +83,7 @@ bun dev
 This will start the app on port 3000.
 
 ### Building binary file
-Please follow the instructions from https://bun.sh/docs/bundler/executables to build a binary file. 
+Please follow the instructions from https://bun.sh/docs/bundler/executables to build a binary file.
 
 Based on my use of MacOS and wanting to get a Linux binary, I would need to run the following commands from the root folder of the project:
 ```bash
