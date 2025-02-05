@@ -53,8 +53,22 @@ If you would like to get updates on the database as they happen, you can use Red
 You can set up Redis connection details via the env variable `REDIS_CONNECTION_STRING`. The app will subscribe to the channel defined by `REDIS_SYNC_CHANNEL`. By default, it is set to `sync`.
 As long as the query that makes changes to the database is executed via the app, and client or proxy response indicates the change via `rowsAffected`, the app will publish a `sync` message to the channel. All servers that are subscribed to the channel will receive the message and will sync the database.
 
-## Installation
-In the future (very soon), you will be able to download a binary for your platform from the releases on Github. At the moment, you will need to run compilation yourself or run the code from source.
+## Running the app from binary file (simplest, easiest way)
+Download the binary file from the [releases](https://github.com/digitalmio/turso-edge-pop/releases) page for your platform. For MacOS (Darwin) and Linux you have option for ARM64 and x64, for Windows you have x64 only. 
+
+To run the app, you will need to provide the same environment variables as when running from source code (check below in section "Development and running from source code"). Bun reads `.env` file, but this solution is advisable for development only. To run the binary file run the following command (example for MacOS ARM64).
+
+```bash
+./tursoEdgePop-darwin-arm64
+```
+
+It is possible that you'll need to change the permissions of the file to make it executable (example for MacOS ARM64).
+
+```bash
+chmod +x tursoEdgePop-darwin-arm64
+```
+
+## Development and running from source code
 You will need to have [Bun](https://bun.sh/) installed on your machine. This will not be required in the future. The binary file will be self-contained and will be able to run without any additional dependencies.
 
 The app does require connection and configuration details to run. You will need to provide them via environment variables. A full list of options as [Zod schema](https://zod.dev/) is available in the [env.ts](src/helpers/env.ts) file.
@@ -80,7 +94,7 @@ bun dev
 
 This will start the app on port 3000.
 
-### Building binary file
+### Building own binary file
 Please follow the instructions from https://bun.sh/docs/bundler/executables to build a binary file.
 
 Based on my use of MacOS and wanting to get a Linux binary, I would need to run the following commands from the root folder of the project:

@@ -177,3 +177,7 @@ dist
 # Local database
 local.db
 local.db*
+
+
+# binaries
+tursoEdgePop-*
