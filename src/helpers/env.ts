@@ -7,7 +7,7 @@ export const env = createEnv({
     // Turso
     TURSO_DATABASE_URL: z.string().url(),
     TURSO_AUTH_TOKEN: z.string().startsWith("ey"),
-    TURSO_SYNC_INTERVAL: z.coerce.number().default(60),
+    TURSO_SYNC_INTERVAL: z.coerce.number().min(3).default(60),
 
     // Local SQL database file
     DB_FILEPATH: z.string().default("/app/data/local.db"),

@@ -1,6 +1,6 @@
 import Redis from "ioredis";
 import { env } from "./env";
-import { tursoClient } from "./turso-client";
+import { tursoClientSync } from "./turso-client";
 
 // why 2 instances?
 // - _redisPub_ is used for publishing sync events
@@ -23,6 +23,6 @@ export const publishRedisSyncCommand = async () => {
   if (redisPub) {
     redisPub.publish(env.REDIS_SYNC_CHANNEL, "sync");
   } else {
-    await tursoClient.sync();
+    await tursoClientSync("api");
   }
 };

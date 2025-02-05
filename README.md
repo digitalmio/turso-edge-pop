@@ -28,8 +28,6 @@ The `/v2` and `/v3` endpoints are more complex. Turso Edge POP will run all `exe
 
 The app also exposes a `/health` and `/version` informational endpoints.
 
-Lastly, you can use `/sync` endpoint to manually trigger a sync of the _local database_ with the origin database. Please note that this will sync local POP only (ie won't send pubsub message to other POPs).
-
 Turso Edge POP supports HTTP requests only (no websocket support etc), hence you need to use `http`/`https` url when connecting to POP.
 
 When you point your client to the POP, it will either respond with local data or seamlessly proxy your request to the origin server. This process is automatic and does not require any special setup from the client. On successful origin response, POP will also process a `sync` update to fetch a fresh copy if any writes were made.

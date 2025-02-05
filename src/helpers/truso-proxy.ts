@@ -1,6 +1,5 @@
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { env } from "./env";
-import { tursoClient } from "./turso-client";
 
 export const tursoProxy = async (requests: string) => {
   const response = await fetch(`${env.TURSO_DATABASE_URL}/v3/pipeline`, {
@@ -13,11 +12,6 @@ export const tursoProxy = async (requests: string) => {
   });
 
   const status = response.status as ContentfulStatusCode;
-
-  // Sync to local database
-  if (status === 200) {
-    await tursoClient.sync();
-  }
 
   return {
     status,

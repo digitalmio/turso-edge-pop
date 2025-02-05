@@ -2,11 +2,11 @@ import debounce from "debounce";
 import { env } from "../helpers/env";
 import { logger } from "../helpers/logger";
 import { redisSub } from "../helpers/redis";
-import { tursoClient } from "../helpers/turso-client";
+import { tursoClientSync } from "../helpers/turso-client";
 
 export let lastSyncTimestamp = 0;
 
-export const syncJob = () => {
+export const syncJobPubsub = () => {
   if (redisSub) {
     // subscribe
     redisSub.subscribe(env.REDIS_SYNC_CHANNEL, (err, count) => {
@@ -32,7 +32,7 @@ export const syncJob = () => {
             "Received 'sync' message on channel %s. Syncing database.",
             channel,
           );
-          await tursoClient.sync();
+          await tursoClientSync("pubsub");
           lastSyncTimestamp = Math.floor(Date.now() / 1000);
         }, env.REDIS_SYNC_DEBOUNCE * 1000);
       }
