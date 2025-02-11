@@ -1,6 +1,4 @@
 import type { ResultSet } from "@libsql/client";
-import { Parser } from "node-sql-parser";
-const parser = new Parser();
 
 // format value to match Turso V2-V3 response format
 export const formatValue = (value: unknown) => {
@@ -75,7 +73,75 @@ export const clearSQLInput = (input: string) =>
   input
     .replace(/--.*$/gm, "") // Remove single-line comments
     .replace(/\/\*[\s\S]*?\*\//g, "") // Remove multi-line comments
-    .trim(); // Trim any remaining leading/trailing whitespace
+    .trim() // Trim any remaining leading/trailing whitespace
+    .toUpperCase();
+
+type QueryType =
+  | "SELECT"
+  | "INSERT"
+  | "UPDATE"
+  | "DELETE"
+  | "CREATE"
+  | "DROP"
+  | "ALTER"
+  | "TRUNCATE"
+  | "REPLACE"
+  | "EXEC"
+  | "UNKNOWN"
+  | "MIXED";
+
+// determine type of query based on first command/word in statement
+// this also takes to consideration all subqueries and makes sure that they are selects as well
+// if they are not - they are marked as mixed
+const getSqlQueryType = (rawQuery: string): QueryType => {
+  const query = clearSQLInput(rawQuery);
+
+  // Match the first SQL command
+  const mainMatch = query.match(
+    /^(SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|TRUNCATE|REPLACE|EXEC)\b/,
+  );
+  if (!mainMatch) return "UNKNOWN";
+
+  const mainType = mainMatch[1];
+
+  // If not SELECT, return the query type directly
+  if (mainType !== "SELECT") return mainType as QueryType;
+
+  // Function to extract content inside all parentheses
+  const extractSubqueries = (sql: string) => {
+    let depth = 0;
+    let current = "";
+    return [...sql].reduce<Array<string>>((subqueries, char) => {
+      if (char === "(") {
+        if (depth > 0) current += char;
+        depth++;
+      } else if (char === ")") {
+        depth--;
+        if (depth === 0) {
+          subqueries.push(current);
+          current = "";
+        } else {
+          current += char;
+        }
+      } else if (depth > 0) {
+        current += char;
+      }
+      return subqueries;
+    }, []);
+  };
+
+  // Extract subqueries
+  const subqueries = extractSubqueries(query);
+
+  // Check if any subquery contains a modifying SQL command
+  const hasModifyingStatement = subqueries.some((sub) =>
+    /\b(INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|TRUNCATE|REPLACE|EXEC)\b/.test(
+      sub,
+    ),
+  );
+
+  return hasModifyingStatement ? "MIXED" : "SELECT";
+};
 
 type Query = string | ParamQuery;
 type ParamQuery = {
@@ -98,16 +164,12 @@ export const hasTransactionKeywords = (statements: Query[]) =>
 
 // check if the statements contain multiple write operations
 // this will be needed to determine if we need to use transaction
-export const hasMultipleWriteOperations = (statements: Query[]) =>
-  statements
-    .map((el) => (typeof el === "string" ? el : el.q))
-    .reduce((acc, el) => {
-      const ast = parser.astify(el, { database: "Sqlite" });
-      const isNonSelect = Array.isArray(ast)
-        ? ast.every((a) => a.type !== "select")
-        : ast.type !== "select";
-      return acc + +isNonSelect; // Using unary + operator to parse boolean as number
-    }, 0) > 1;
+const hasMultipleWriteOperations = (statements: Query[]) =>
+  statements.reduce((acc, el) => {
+    const query = typeof el === "string" ? el : el.q;
+    const elValue = getSqlQueryType(query) === "SELECT" ? 0 : 1;
+    return acc + elValue;
+  }, 0) > 1;
 
 // We don't need transaction if:
 // - there is just 1 statement
