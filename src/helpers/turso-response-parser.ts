@@ -93,7 +93,7 @@ type QueryType =
 // determine type of query based on first command/word in statement
 // this also takes to consideration all subqueries and makes sure that they are selects as well
 // if they are not - they are marked as mixed
-const getSqlQueryType = (rawQuery: string): QueryType => {
+export const getSqlQueryType = (rawQuery: string): QueryType => {
   const query = clearSQLInput(rawQuery);
 
   // Match the first SQL command
